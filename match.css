@@ -68,5 +68,6 @@ label {
 }
 
 input[type="checkbox"] {
+    text-align: center;
     margin-right: 10px;
 }
