@@ -57,7 +57,7 @@ function getDifferences(text1, text2) {
 
     for (let i = 0; i < maxLength; i++) {
         if (lines1[i] !== lines2[i]) {
-            diff += `Line ${i + 1}:\nFile 1: ${lines1[i] || ''}\nFile 2: ${lines2[i] || ''}\n\n`;
+            diff += `Line ${i + 1}:\nFile 1: ${lines1[i] || ''}\nFile 2: ${lines2[i] || ''}\n`;
         }
     }
 
