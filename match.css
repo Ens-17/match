@@ -61,13 +61,13 @@ pre span.line-number {
 }
 
 label {
-    display: block;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 20px auto;
     font-size: 16px;
 }
 
 input[type="checkbox"] {
-    text-align: center;
     margin-right: 10px;
 }
