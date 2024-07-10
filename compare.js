@@ -25,6 +25,11 @@ async function compareFiles() {
         return;
     }
 
+    if (!hasSameExtension(file1, file2)) {
+        resultElement.textContent = '選択されたファイルの拡張子が一致していません';
+        return;
+    }
+
     try {
         const [content1, content2] = await Promise.all([readFile(file1), readFile(file2)]);
 
@@ -47,6 +52,12 @@ async function compareFiles() {
 function isAllowedExtension(file, allowedExtensions) {
     const fileExtension = file.name.split('.').pop().toLowerCase();
     return allowedExtensions.includes(fileExtension);
+}
+
+function hasSameExtension(file1, file2) {
+    const ext1 = file1.name.split('.').pop().toLowerCase();
+    const ext2 = file2.name.split('.').pop().toLowerCase();
+    return ext1 === ext2;
 }
 
 function getDifferences(text1, text2, file1Name, file2Name) {
