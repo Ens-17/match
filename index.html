@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Comparison</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>File Comparison</h1>
+    <input type="file" id="file1" accept=".usc,.sus">
+    <input type="file" id="file2" accept=".usc,.sus">
+    <label>
+        <input type="checkbox" id="detailedComparison">
+        詳細な比較を行う
+    </label>
+    <button onclick="compareFiles()">Compare</button>
+    <pre id="result"></pre>
+
+    <script src="compare.js"></script>
+</body>
+</html>
