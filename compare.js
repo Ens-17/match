@@ -21,7 +21,7 @@ async function compareFiles() {
     const allowedExtensions = ['usc', 'sus'];
 
     if (!isAllowedExtension(file1, allowedExtensions) || !isAllowedExtension(file2, allowedExtensions)) {
-        resultElement.textContent = 'sus、uscファイルのみに対応しています';
+        resultElement.textContent = 'sus、uscファイルにのみ対応しています';
         return;
     }
 
@@ -29,13 +29,13 @@ async function compareFiles() {
         const [content1, content2] = await Promise.all([readFile(file1), readFile(file2)]);
 
         if (detailedComparison) {
-            const comparisonResult = getDetailedComparison(content1, content2);
+            const comparisonResult = getDetailedComparison(content1, content2, file1.name, file2.name);
             resultElement.innerHTML = comparisonResult;
         } else {
             if (content1 === content2) {
                 resultElement.textContent = '一致しています';
             } else {
-                const diff = getDifferences(content1, content2);
+                const diff = getDifferences(content1, content2, file1.name, file2.name);
                 resultElement.textContent = `不一致の部分:\n${diff}`;
             }
         }
@@ -49,7 +49,7 @@ function isAllowedExtension(file, allowedExtensions) {
     return allowedExtensions.includes(fileExtension);
 }
 
-function getDifferences(text1, text2) {
+function getDifferences(text1, text2, file1Name, file2Name) {
     const lines1 = text1.split('\n');
     const lines2 = text2.split('\n');
     const maxLength = Math.max(lines1.length, lines2.length);
@@ -57,14 +57,14 @@ function getDifferences(text1, text2) {
 
     for (let i = 0; i < maxLength; i++) {
         if (lines1[i] !== lines2[i]) {
-            diff += `Line ${i + 1}:\nFile 1: ${lines1[i] || ''}\nFile 2: ${lines2[i] || ''}\n`;
+            diff += `Line ${i + 1}:\n${file1Name}: ${lines1[i] || ''}\n${file2Name}: ${lines2[i] || ''}\n\n`;
         }
     }
 
     return diff;
 }
 
-function getDetailedComparison(text1, text2) {
+function getDetailedComparison(text1, text2, file1Name, file2Name) {
     const lines1 = text1.split('\n');
     const lines2 = text2.split('\n');
     const maxLength = Math.max(lines1.length, lines2.length);
@@ -74,7 +74,7 @@ function getDetailedComparison(text1, text2) {
         if (lines1[i] === lines2[i]) {
             result += `<span class="match"><span class="line-number">Line ${i + 1}</span>: ${lines1[i] || ''}</span>`;
         } else {
-            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>File 1: ${lines1[i] || ''}<br>File 2: ${lines2[i] || ''}</span><br>`;
+            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>${file1Name}: ${lines1[i] || ''}<br>${file2Name}: ${lines2[i] || ''}</span>`;
         }
     }
 
