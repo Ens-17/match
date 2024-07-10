@@ -14,14 +14,14 @@ async function compareFiles() {
     const detailedComparison = document.getElementById('detailedComparison').checked;
 
     if (!file1 || !file2) {
-        resultElement.textContent = 'Please select both files.';
+        resultElement.textContent = '両方にファイルを選択してください';
         return;
     }
 
     const allowedExtensions = ['usc', 'sus'];
 
     if (!isAllowedExtension(file1, allowedExtensions) || !isAllowedExtension(file2, allowedExtensions)) {
-        resultElement.textContent = 'Please select .usc or .sus files only.';
+        resultElement.textContent = 'sus、uscファイルのみに対応しています';
         return;
     }
 
