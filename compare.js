@@ -18,10 +18,10 @@ async function compareFiles() {
         return;
     }
 
-    const allowedExtensions = ['usc', 'sus', 'txt'];
+    const allowedExtensions = ['usc', 'sus'];
 
     if (!isAllowedExtension(file1, allowedExtensions) || !isAllowedExtension(file2, allowedExtensions)) {
-        resultElement.textContent = 'sus、usc、txtファイルにのみ対応しています';
+        resultElement.textContent = 'sus、uscファイルにのみ対応しています';
         return;
     }
 
