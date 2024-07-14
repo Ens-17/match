@@ -14,14 +14,19 @@ async function compareFiles() {
     const detailedComparison = document.getElementById('detailedComparison').checked;
 
     if (!file1 || !file2) {
-        resultElement.textContent = '選択されたファイルの拡張子が一致していません';
+        resultElement.textContent = '両方にファイルを選択してください';
         return;
     }
 
-    const allowedExtensions = ['usc', 'sus', 'chs', 'mmws', 'ccmmws'];
+    const allowedExtensions = ['usc', 'sus', 'chs', 'ccmmws', 'mmws'];
 
     if (!isAllowedExtension(file1, allowedExtensions) || !isAllowedExtension(file2, allowedExtensions)) {
         resultElement.textContent = '譜面ファイルにのみ対応しています';
+        return;
+    }
+
+    if (!hasSameExtension(file1, file2)) {
+        resultElement.textContent = '選択されたファイルの拡張子が一致していません';
         return;
     }
 
@@ -49,6 +54,12 @@ function isAllowedExtension(file, allowedExtensions) {
     return allowedExtensions.includes(fileExtension);
 }
 
+function hasSameExtension(file1, file2) {
+    const ext1 = file1.name.split('.').pop().toLowerCase();
+    const ext2 = file2.name.split('.').pop().toLowerCase();
+    return ext1 === ext2;
+}
+
 function getDifferences(text1, text2, file1Name, file2Name) {
     const lines1 = text1.split('\n');
     const lines2 = text2.split('\n');
@@ -74,35 +85,9 @@ function getDetailedComparison(text1, text2, file1Name, file2Name) {
         if (lines1[i] === lines2[i]) {
             result += `<span class="match"><span class="line-number">Line ${i + 1}</span>: ${lines1[i] || ''}</span>`;
         } else {
-            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>${file1Name}: ${lines1[i] || ''}<br>${file2Name}: ${lines2[i] || ''}</span><br>`;
+            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>${file1Name}: ${lines1[i] || ''}<br>${file2Name}: ${lines2[i] || ''}</span>`;
         }
     }
 
     return result;
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const fileDropArea = document.getElementById('fileDropArea');
-
-    fileDropArea.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        fileDropArea.classList.add('dragover');
-    });
-
-    fileDropArea.addEventListener('dragleave', () => {
-        fileDropArea.classList.remove('dragover');
-    });
-
-    fileDropArea.addEventListener('drop', (event) => {
-        event.preventDefault();
-        fileDropArea.classList.remove('dragover');
-
-        const files = event.dataTransfer.files;
-        if (files.length >= 2) {
-            document.getElementById('file1').files = files[0];
-            document.getElementById('file2').files = files[1];
-        } else {
-            alert('両方にファイルを選択してください.');
-        }
-    });
-});
