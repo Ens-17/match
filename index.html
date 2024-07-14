@@ -7,13 +7,16 @@
     <link rel="stylesheet" href="match.css">
 </head>
 <body>
-    <input type="file" id="file1" accept=".usc,.sus,.chs,.mmws,.ccmmws">
-    <input type="file" id="file2" accept=".usc,.sus,.chs,.mmws,.ccmmws">
+    <div class="file-drop-area" id="fileDropArea">
+        <input type="file" id="file1" accept=".usc,.sus,.chs,.mmws,.ccmmws">
+        <input type="file" id="file2" accept=".usc,.sus,.chs,.mmws,.ccmmws">
+        <p>ここにファイルをドラッグ＆ドロップするか、クリックしてファイルを選択してください</p>
+    </div>
     <label>
         <input type="checkbox" id="detailedComparison">
-        全体を表示<br>(sus、usc以外のファイルの場合推奨しません)
+        全体を表示
     </label>
-    <button onclick="compareFiles()">比較</button>
+    <button onclick="compareFiles()">Compare</button>
     <pre id="result"></pre>
 
     <script src="compare.js"></script>
