@@ -18,15 +18,10 @@ async function compareFiles() {
         return;
     }
 
-    const allowedExtensions = ['usc', 'sus', 'chs', 'ccmmws', 'mmws'];
+    const allowedExtensions = ['usc', 'sus'];
 
     if (!isAllowedExtension(file1, allowedExtensions) || !isAllowedExtension(file2, allowedExtensions)) {
         resultElement.textContent = '譜面ファイルにのみ対応しています';
-        return;
-    }
-
-    if (!hasSameExtension(file1, file2)) {
-        resultElement.textContent = '選択されたファイルの拡張子が一致していません';
         return;
     }
 
@@ -54,12 +49,6 @@ function isAllowedExtension(file, allowedExtensions) {
     return allowedExtensions.includes(fileExtension);
 }
 
-function hasSameExtension(file1, file2) {
-    const ext1 = file1.name.split('.').pop().toLowerCase();
-    const ext2 = file2.name.split('.').pop().toLowerCase();
-    return ext1 === ext2;
-}
-
 function getDifferences(text1, text2, file1Name, file2Name) {
     const lines1 = text1.split('\n');
     const lines2 = text2.split('\n');
@@ -85,7 +74,7 @@ function getDetailedComparison(text1, text2, file1Name, file2Name) {
         if (lines1[i] === lines2[i]) {
             result += `<span class="match"><span class="line-number">Line ${i + 1}</span>: ${lines1[i] || ''}</span>`;
         } else {
-            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>${file1Name}: ${lines1[i] || ''}<br>${file2Name}: ${lines2[i] || ''}</span>`;
+            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>${file1Name}: ${lines1[i] || ''}<br>${file2Name}: ${lines2[i] || ''}</span><br>`;
         }
     }
 
