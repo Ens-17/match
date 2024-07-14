@@ -18,7 +18,7 @@ async function compareFiles() {
         return;
     }
 
-    const allowedExtensions = ['usc', 'sus'];
+    const allowedExtensions = ['usc', 'sus', 'chs', 'ccmmws', 'mmws'];
 
     if (!isAllowedExtension(file1, allowedExtensions) || !isAllowedExtension(file2, allowedExtensions)) {
         resultElement.textContent = '譜面ファイルにのみ対応しています';
