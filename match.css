@@ -15,7 +15,7 @@ input[type="file"] {
     display: block;
     margin: 20px auto;
     padding: 10px;
-    background-color: #dfffd1;
+    background-color: #45a049;
     border: 1px solid #ddd;
     border-radius: 5px;
     cursor: pointer;
@@ -25,7 +25,7 @@ input[type="file"] {
 }
 
 input[type="file"]::file-selector-button {
-    background-color: #ffffff;
+    background-color: #45a049;
     color: white;
     border: none;
     border-radius: 5px;
