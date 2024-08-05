@@ -93,3 +93,10 @@ label {
 input[type="checkbox"] {
     margin-right: 10px;
 }
+
+.centered-link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* 垂直方向に中央揃えするための高さ */
+}
