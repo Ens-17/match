@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>uscファイル相互変換</title>
+    <link rel="stylesheet" href="CSS.css">
+</head>
+<body>
+    <form id="conversionForm">
+        <div>
+            <label for="uscFile">uscファイルを選択</label>
+            <input type="file" id="uscFile" name="uscFile" accept=".usc" required>
+        </div>
+        <div>
+            <label for="format">どちらにインポートしたいかを選択</label>
+            <select id="format" name="format" required>
+                <option value="mmw">MikuMikuWorld for CC</option>
+                <option value="ched">改造Ched(不完全です。動くのかもわかりません)</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">変換</button>
+        </div>
+    </form>
+
+    <script src="interconversion.js"></script>
+</body>
+</html>
