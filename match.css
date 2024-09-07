@@ -102,7 +102,7 @@ a {
     margin: 0 auto;
 }
 
-#scrollToTopBtn {
+scrollToTopBtn {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -118,6 +118,6 @@ a {
     transition: background-color 0.3s;
 }
 
-#scrollToTopBtn:hover {
+scrollToTopBtn:hover {
     background-color: #333;
 }
