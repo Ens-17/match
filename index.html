@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>譜面ファイル一致検査</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <link rel="stylesheet" href="match.css">
 </head>
 <body>
-    <input type="file" id="file1" accept=".usc,.sus,.chs,.mmws,.ccmmws">
-    <input type="file" id="file2" accept=".usc,.sus,.chs,.mmws,.ccmmws">
-    <label>
-        <input type="checkbox" id="detailedComparison">
-        全体を表示<br>(sus,usc以外の場合推奨しません)
-    </label>
-    <button onclick="compareFiles()">比較</button>
-    <pre id="result"></pre>
-    <a href="interconversion.html">usc相互変換はこちら</a>
-    
-    <!-- スクロールボタン -->
-    <button id="scrollToTopBtn" onclick="scrollToTop()"> ↑ </button>
+    <div class="container">
+        <h1>譜面ファイル一致検査</h1>
+        <input type="file" id="file1" accept=".usc,.sus,.chs,.mmws,.ccmmws">
+        <input type="file" id="file2" accept=".usc,.sus,.chs,.mmws,.ccmmws">
+        <label>
+            <input type="checkbox" id="detailedComparison">
+            全体を表示<br>(sus,usc以外の場合推奨しません)
+        </label>
+        <button onclick="compareFiles()">比較</button>
+        <pre id="result"></pre>
+        <a href="interconversion.html">usc相互変換はこちら</a>
+
+        <!-- スクロールボタン -->
+        <button id="scrollToTopBtn" onclick="scrollToTop()"> ↑ </button>
+    </div>
 
     <script src="compare.js"></script>
 </body>
