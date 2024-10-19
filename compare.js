@@ -12,6 +12,7 @@ async function compareFiles() {
     const file2 = document.getElementById('file2').files[0];
     const resultElement = document.getElementById('result');
     const detailedComparison = document.getElementById('detailedComparison').checked;
+    const sortContent = document.getElementById('sortContent').checked;
 
     if (!file1 || !file2) {
         resultElement.textContent = '両方にファイルを選択してください';
@@ -31,7 +32,12 @@ async function compareFiles() {
     }
 
     try {
-        const [content1, content2] = await Promise.all([readFile(file1), readFile(file2)]);
+        let [content1, content2] = await Promise.all([readFile(file1), readFile(file2)]);
+
+        if (sortContent) {
+            content1 = sortText(content1);
+            content2 = sortText(content2);
+        }
 
         if (detailedComparison) {
             const comparisonResult = getDetailedComparison(content1, content2, file1.name, file2.name);
@@ -41,7 +47,7 @@ async function compareFiles() {
                 resultElement.textContent = '一致しています';
             } else {
                 const diff = getDifferences(content1, content2, file1.name, file2.name);
-                resultElement.textContent = `不一致の部分:\n${diff}`;
+                resultElement.innerHTML = `<span class="mismatch">${diff}</span>`;
             }
         }
     } catch (error) {
@@ -68,7 +74,9 @@ function getDifferences(text1, text2, file1Name, file2Name) {
 
     for (let i = 0; i < maxLength; i++) {
         if (lines1[i] !== lines2[i]) {
-            diff += `Line ${i + 1}:\n${file1Name}: ${lines1[i] || ''}\n${file2Name}: ${lines2[i] || ''}\n\n`;
+            diff += `<div><span class="line-number">Line ${i + 1}:</span><br>
+<span class="mismatch">${file1Name}: ${lines1[i] || ''}</span>
+<span class="mismatch">${file2Name}: ${lines2[i] || ''}</span></div><br>`;
         }
     }
 
@@ -83,13 +91,21 @@ function getDetailedComparison(text1, text2, file1Name, file2Name) {
 
     for (let i = 0; i < maxLength; i++) {
         if (lines1[i] === lines2[i]) {
-            result += `<span class="match"><span class="line-number">Line ${i + 1}</span>: ${lines1[i] || ''}</span>`;
+            result += `<span class="match"><span class="line-number">Line ${i + 1}</span>: ${lines1[i] || ''}</span><br>`;
         } else {
-            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>${file1Name}: ${lines1[i] || ''}<br>${file2Name}: ${lines2[i] || ''}</span>`;
+            result += `<span class="mismatch"><span class="line-number">Line ${i + 1}</span> (不一致):<br>
+${file1Name}: ${lines1[i] || ''}
+${file2Name}: ${lines2[i] || ''}</span><br>`;
         }
     }
 
     return result;
+}
+
+function sortText(text) {
+    const lines = text.split('\n');
+    lines.sort();
+    return lines.join('\n');
 }
 
 // スクロールして一定量下がったらボタンを表示
