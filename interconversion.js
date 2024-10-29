@@ -39,11 +39,11 @@ function analyzeUSC(content) {
     }
 
     if (eases.some(ease => ease.includes('inout') || ease.includes('outin'))) {
-        messages.push("公式レギュレーション以外の曲線が使われています");
+        messages.push("直線、加速、減速以外の曲線が使われています");
     }
 
     if (colors.some(color => ['neutral', 'red', 'blue', 'purple', 'black', 'cyan'].includes(color.split('"')[3]))) {
-        messages.push("緑、黄以外の色ガイドがあります");
+        messages.push("緑、黄以外の色ガイドが使われています");
     }
 
     if (timescales.length > 0) {
@@ -67,19 +67,19 @@ function analyzeUSC(content) {
 
         // 1. Laneが-6.0または6.0の場合、Sizeは0.5である必要がある
         if ((laneValue === -6.0 || laneValue === 6.0) && sizeValue !== 0.5 && !laneViolationMessage) {
-            messages.push("公式レギュレーション外のレーンにノーツが置かれています");
+            messages.push("レーン外にノーツが置かれています");
             laneViolationMessage = true; // メッセージを追加したらフラグを立てる
         }
 
         // Laneが許可された値内であること
         if (!allowedLanes.has(laneValue) && !laneViolationMessage) {
-            messages.push("公式レギュレーション外のレーンにノーツが置かれています");
+            messages.push("レーン外、または小数レーンにノーツが置かれています");
             laneViolationMessage = true; // メッセージを追加したらフラグを立てる
         }
 
         // Sizeが許可された値内であること
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
-            messages.push("公式レギュレーション外の幅のノーツが置かれています");
+            messages.push("レーン外、または小数レーンにノーツが置かれています");
             sizeViolationMessage = true; // メッセージを追加したらフラグを立てる
             console.log("Invalid size detected:", sizeValue); // デバッグ用
         }
@@ -89,7 +89,7 @@ function analyzeUSC(content) {
             const sizeDoubled = sizeValue * 2;
             if ((sizeDoubled % 2 === 0 && laneValue % 1 !== 0) || (sizeDoubled % 2 !== 0 && laneValue % 1 === 0)) {
                 if (!laneViolationMessage) {
-                    messages.push("公式レギュレーション外のレーンにノーツが置かれています");
+                    messages.push("レーン外、または小数レーンにノーツが置かれています");
                     laneViolationMessage = true; // メッセージを追加したらフラグを立てる
                 }
             }
