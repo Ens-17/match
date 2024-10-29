@@ -1,61 +1,118 @@
-document.getElementById('conversionForm').addEventListener('submit', function(event) {
-    event.preventDefault();
+document.getElementById('uscFile').addEventListener('change', function() {
+    const fileInput = this;
+    const resultsDiv = document.getElementById('result');
 
-    const fileInput = document.getElementById('uscFile');
-    const format = document.getElementById('format').value;
-    
     if (fileInput.files.length === 0) {
-        alert('ファイルを選択してください');
+        resultsDiv.innerHTML = "エラー: USCファイルを選択してください。";
         return;
     }
 
     const file = fileInput.files[0];
     const reader = new FileReader();
 
-    reader.onload = function(e) {
-        let content = e.target.result;
-
-        if (format === 'ched') {
-            content = convertToched(content);
-        } else if (format === 'mmw') {
-            content = convertToMMW(content);
-        }
-
-        const blob = new Blob([content], { type: 'application/octet-stream' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-
-        if (format === 'ched' || format === 'mmw') {
-            link.download = file.name.replace('.usc', '.usc'); // .usc形式でダウンロード
-        }
-
-        link.click();
-        URL.revokeObjectURL(link.href);
+    reader.onload = function(event) {
+        const content = event.target.result;
+        analyzeUSC(content);
     };
 
-    reader.readAsText(file); // テキストとして読み込む
+    reader.readAsText(file);
 });
 
-// Ched形式への変換処理
-function convertToMMW(content) {
-    const lines = content.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('"type": "attach",')) {
-            lines.splice(i + 1, 0, '            "ease": "linear",');
-            i++; // 新しく追加した行をスキップ
-        }
-    }
-    return lines.join('\n');
-}
+function analyzeUSC(content) {
+    const resultsDiv = document.getElementById('result');
+    resultsDiv.innerHTML = "";  // Clear previous results
 
-// MMW形式への変換処理
-function convertToched(content) {
-    const lines = content.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('"type": "attach",')) {
-            lines.splice(i, 1); // 該当行を削除
-            i--; // 削除した行の次の行を確認するためインデックスを戻す
+    let messages = [];  // ここでメッセージを初期化
+
+    const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
+    const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
+    const fades = content.match(/"fade":\s*"(.*?)"/g) || [];
+    const timescales = content.match(/"timeScale":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
+    const types = content.match(/"type":\s*"(.*?)"/g) || [];
+    const colors = content.match(/"color":\s*"(.*?)"/g) || [];
+    const directions = content.match(/"direction":\s*"(.*?)"/g) || [];
+    const eases = content.match(/"ease":\s*"(.*?)"/g) || [];
+
+    // ルールチェック
+    if (!types.some(type => type.includes('timeScaleGroup'))) {
+        messages.push("レイヤーが複数あります");
+    }
+
+    if (eases.some(ease => ease.includes('inout') || ease.includes('outin'))) {
+        messages.push("公式レギュレーション以外の曲線が使われています");
+    }
+
+    if (colors.some(color => ['neutral', 'red', 'blue', 'purple', 'black', 'cyan'].includes(color.split('"')[3]))) {
+        messages.push("緑、黄以外の色ガイドがあります");
+    }
+
+    if (timescales.length > 0) {
+        const timeScaleValue = parseFloat(timescales[0].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+        if (timeScaleValue < 0) {
+            messages.push("逆走が使用されています");
         }
     }
-    return lines.join('\n');
+
+    // LaneとSizeのチェック
+    const allowedLanes = new Set([-6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
+    const allowedSizes = new Set([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
+
+    // メッセージフラグ
+    let laneViolationMessage = false;
+    let sizeViolationMessage = false;
+
+    for (let i = 0; i < lanes.length; i++) {
+        const laneValue = parseFloat(lanes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+        const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
+
+        // 1. Laneが-6.0または6.0の場合、Sizeは0.5である必要がある
+        if ((laneValue === -6.0 || laneValue === 6.0) && sizeValue !== 0.5 && !laneViolationMessage) {
+            messages.push("公式レギュレーション外のレーンにノーツが置かれています");
+            laneViolationMessage = true; // メッセージを追加したらフラグを立てる
+        }
+
+        // Laneが許可された値内であること
+        if (!allowedLanes.has(laneValue) && !laneViolationMessage) {
+            messages.push("公式レギュレーション外のレーンにノーツが置かれています");
+            laneViolationMessage = true; // メッセージを追加したらフラグを立てる
+        }
+
+        // Sizeが許可された値内であること
+        if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
+            messages.push("公式レギュレーション外の幅のノーツが置かれています");
+            sizeViolationMessage = true; // メッセージを追加したらフラグを立てる
+            console.log("Invalid size detected:", sizeValue); // デバッグ用
+        }
+
+        // Sizeが2倍になった結果の条件チェック
+        if (sizeValue !== null) {
+            const sizeDoubled = sizeValue * 2;
+            if ((sizeDoubled % 2 === 0 && laneValue % 1 !== 0) || (sizeDoubled % 2 !== 0 && laneValue % 1 === 0)) {
+                if (!laneViolationMessage) {
+                    messages.push("公式レギュレーション外のレーンにノーツが置かれています");
+                    laneViolationMessage = true; // メッセージを追加したらフラグを立てる
+                }
+            }
+        }
+    }
+
+    // その他のルールのチェック
+    if (types.some(type => type.includes('damage'))) {
+        messages.push("ダメージノーツが使われています");
+    }
+
+    if (directions.some(direction => direction.includes('none'))) {
+        messages.push("矢印無しフリックが使われています");
+    }
+
+    if (fades.some(fade => fade.includes('in'))) {
+        messages.push("フェードインガイドが使われています");
+    }
+
+    // 結果の出力
+    if (messages.length > 0) {
+        resultsDiv.innerHTML = messages.join("<br>") + "<br>";
+    } else {
+        resultsDiv.innerHTML = "公式レギュレーション内です<br>";
+    }
 }
