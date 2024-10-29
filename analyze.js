@@ -79,7 +79,7 @@ function analyzeUSC(content) {
 
         // Sizeが許可された値内であること
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
-            messages.push("レーン外、または小数レーンにノーツが置かれています");
+            messages.push("1~12の整数幅ではないノーツがあります。");
             sizeViolationMessage = true; // メッセージを追加したらフラグを立てる
             console.log("Invalid size detected:", sizeValue); // デバッグ用
         }
