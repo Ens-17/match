@@ -95,7 +95,7 @@ function analyzeUSC(content) {
             laneViolationMessage = true;
         }
 
-        if ((laneValue === 0.5 || laneValue === -1.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && sizeValue !== 4.5 && sizeValue !== 5.5 && !laneViolationMessage) {
+        if ((laneValue === 0.5 || laneValue === -0.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && sizeValue !== 4.5 && sizeValue !== 5.5 && !laneViolationMessage) {
             messages.push("・レーン外にノーツが使われています");
             laneViolationMessage = true;
         }
