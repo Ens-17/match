@@ -47,12 +47,13 @@ function analyzeUSC(content) {
         messages.push("・緑、黄以外の色ガイドが使われています");
     }
 
-    if (timeScale.length > 0) {
-        const timeScaleValue = parseFloat(timeScale[0].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+    if (data.hasOwnProperty('timeScale')) {
+        const timeScaleValue = parseFloat(data.timeScale);
         if (timeScaleValue < 0) {
-            messages.push("・逆走が使用されています");
+        messages.push("・逆走が使用されています");
         }
     }
+
 
     // LaneとSizeのチェック
     const allowedLanes = new Set([-6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
