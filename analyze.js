@@ -48,10 +48,12 @@ function analyzeUSC(content) {
     }
 
     if (data.hasOwnProperty('timeScale')) {
-        const negativeTimeScale = /"timeScale":\s*-\d+(\.\d+)?/.test(content);
-        if (negativeTimeScale) {
-          messages.push("・逆走が使用されています");
+        const timeScaleValue = parseFloat(data.timeScale);
+        if (timeScaleValue < 0) {
+            messages.push("・逆走が使用されています");
+        }
     }
+
 
 
     // LaneとSizeのチェック
