@@ -67,19 +67,19 @@ function analyzeUSC(content) {
 
         // 1. Laneが-6.0または6.0の場合、Sizeは0.5である必要がある
         if ((laneValue === -6.0 || laneValue === 6.0) && sizeValue !== 0.5 && !laneViolationMessage) {
-            messages.push("レーン外にノーツが置かれています");
+            messages.push("レーン外にノーツが使われています");
             laneViolationMessage = true; // メッセージを追加したらフラグを立てる
         }
 
         // Laneが許可された値内であること
         if (!allowedLanes.has(laneValue) && !laneViolationMessage) {
-            messages.push("レーン外、または小数レーンにノーツが置かれています");
+            messages.push("レーン外、または小数レーンにノーツが使われています");
             laneViolationMessage = true; // メッセージを追加したらフラグを立てる
         }
 
         // Sizeが許可された値内であること
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
-            messages.push("1~12の整数幅ではないノーツがあります");
+            messages.push("1~12の整数幅ではないノーツが使われています");
             sizeViolationMessage = true; // メッセージを追加したらフラグを立てる
             console.log("Invalid size detected:", sizeValue); // デバッグ用
         }
@@ -89,7 +89,7 @@ function analyzeUSC(content) {
             const sizeDoubled = sizeValue * 2;
             if ((sizeDoubled % 2 === 0 && laneValue % 1 !== 0) || (sizeDoubled % 2 !== 0 && laneValue % 1 === 0)) {
                 if (!laneViolationMessage) {
-                    messages.push("レーン外、または小数レーンにノーツが置かれています");
+                    messages.push("レーン外、または小数レーンにノーツが使われています");
                     laneViolationMessage = true; // メッセージを追加したらフラグを立てる
                 }
             }
