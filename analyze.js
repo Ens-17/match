@@ -54,8 +54,7 @@ function analyzeUSC(content) {
         
         if (timeScaleValue < 0) {
             messages.push("・逆走が使用されています");
-            // ループを抜ける場合は、以下の行をコメントアウトまたは削除してください。
-            // break; // これにより、1つの負の timeScale のみでメッセージが追加される。
+            break; // 1つの負の timeScale が見つかった時点でループを終了
         }
     }
 
