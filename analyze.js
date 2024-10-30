@@ -1,8 +1,8 @@
 function analyzeUSC(content) {
     const resultsDiv = document.getElementById('result');
-    resultsDiv.innerHTML = "";  // Clear previous results
+    resultsDiv.innerHTML = "";
 
-    let messages = [];  // ここでメッセージを初期化
+    let messages = [];
     const data = {};
 
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
@@ -14,7 +14,6 @@ function analyzeUSC(content) {
     const directions = content.match(/"direction":\s*"(.*?)"/g) || [];
     const eases = content.match(/"ease":\s*"(.*?)"/g) || [];
 
-    // ルールチェック
     if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
         messages.push("・レイヤーが複数あります");
     }
@@ -27,20 +26,17 @@ function analyzeUSC(content) {
         messages.push("・緑、黄以外の色ガイドが使われています");
     }
 
-    // 逆走チェック: すべての timeScale を評価
     for (let timeScale of timescales) {
         const value = parseFloat(timeScale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         if (value < 0) {
             messages.push("・逆走が使われています");
-            break;  // Found a negative value, no need to continue checking
+            break;
         }
     }
 
-    // LaneとSizeのチェック
-    const allowedLanes = new Set([-6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
+    const allowedLanes = new Set([-5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]);
     const allowedSizes = new Set([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
 
-    // メッセージフラグ
     let laneViolationMessage = false;
     let sizeViolationMessage = false;
 
@@ -48,23 +44,76 @@ function analyzeUSC(content) {
         const laneValue = parseFloat(lanes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
 
-        // 1. Laneが-6.0または6.0の場合、Sizeは0.5である必要がある
-        if ((laneValue === -6.0 || laneValue === 6.0) && sizeValue !== 0.5 && !laneViolationMessage) {
+        // Laneが-nまたはnの場合、Sizeはx~yである必要がある
+        if ((laneValue === -5.5 || laneValue === 5.5) && sizeValue !== 0.5 && !laneViolationMessage) {
             messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true; // メッセージを追加したらフラグを立てる
+            laneViolationMessage = true;
         }
 
-        // Laneが許可された値内であること
+        if ((laneValue === 5.0 || laneValue === -5.0) && sizeValue !== 1.0 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 4.5 || laneValue === -4.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 4.0 || laneValue === -4.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 3.5 || laneValue === -3.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 3.0 || laneValue === -3.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 2.5 || laneValue === -2.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 2.0 || laneValue === -2.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && sizeValue !== 4.0 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 1.5 || laneValue === -1.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && sizeValue !== 4.5 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 1.0 || laneValue === -1.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && sizeValue !== 4.0 && sizeValue !== 5.0 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 0.5 || laneValue === -1.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && sizeValue !== 4.5 && sizeValue !== 5.5 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
+        if ((laneValue === 0.0 || laneValue === 0.0) && sizeValue !== 6.0 && !laneViolationMessage) {
+            messages.push("・レーン外にノーツが使われています");
+            laneViolationMessage = true;
+        }
+
         if (!allowedLanes.has(laneValue) && !laneViolationMessage) {
             messages.push("・レーン外、または小数レーンにノーツが使われています");
-            laneViolationMessage = true; // メッセージを追加したらフラグを立てる
+            laneViolationMessage = true;
         }
 
-        // Sizeが許可された値内であること
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
             messages.push("・1~12の整数幅ではないノーツが使われています");
-            sizeViolationMessage = true; // メッセージを追加したらフラグを立てる
-            console.log("Invalid size detected:", sizeValue); // デバッグ用
+            sizeViolationMessage = true;
+            console.log("Invalid size detected:", sizeValue);
         }
 
         // Sizeが2倍になった結果の条件チェック
@@ -73,13 +122,12 @@ function analyzeUSC(content) {
             if ((sizeDoubled % 2 === 0 && laneValue % 1 !== 0) || (sizeDoubled % 2 !== 0 && laneValue % 1 === 0)) {
                 if (!laneViolationMessage) {
                     messages.push("・レーン外、または小数レーンにノーツが使われています");
-                    laneViolationMessage = true; // メッセージを追加したらフラグを立てる
+                    laneViolationMessage = true;
                 }
             }
         }
     }
 
-    // その他のルールのチェック
     if (types.some(type => type.includes('damage'))) {
         messages.push("・ダメージノーツが使われています");
     }
