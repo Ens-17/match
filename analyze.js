@@ -3,7 +3,7 @@ document.getElementById('uscFile').addEventListener('change', function() {
     const resultsDiv = document.getElementById('result');
 
     if (fileInput.files.length === 0) {
-        resultsDiv.innerHTML = "エラー: USCファイルを選択してください。";
+        resultsDiv.innerHTML = "USCファイルを選択してください。";
         return;
     }
 
