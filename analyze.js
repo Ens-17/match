@@ -50,7 +50,7 @@ function analyzeUSC(content) {
     if (data.hasOwnProperty('timeScale')) {
         const timeScaleValue = parseFloat(data.timeScale);
         if (timeScaleValue < 0) {
-        messages.push("・逆走が使用されています");
+            messages.push("・逆走が使用されています");
         }
     }
 
