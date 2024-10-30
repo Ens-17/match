@@ -7,7 +7,7 @@ document.getElementById('uscFile').addEventListener('change', function() {
         return;
     }
 
-    const allowedExtensions = ['usc'];
+    const allowedExtensions = ['.usc'];
 
     if (!isAllowedExtension(uscFile, allowedExtensions)) {
         resultDiv.innerHTML = 'uscファイルにのみ対応しています';
