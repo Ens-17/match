@@ -1,23 +1,3 @@
-document.getElementById('uscFile').addEventListener('change', function() {
-    const fileInput = this;
-    const resultsDiv = document.getElementById('result');
-
-    if (fileInput.files.length === 0) {
-        resultsDiv.innerHTML = "USCファイルを選択してください。";
-        return;
-    }
-    
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(event) {
-        const content = event.target.result;
-        analyzeUSC(content);
-    };
-
-    reader.readAsText(file);
-});
-
 function analyzeUSC(content) {
     const resultsDiv = document.getElementById('result');
     resultsDiv.innerHTML = "";  // Clear previous results
@@ -39,7 +19,6 @@ function analyzeUSC(content) {
         messages.push("・レイヤーが複数あります");
     }
 
-
     if (eases.some(ease => ease.includes('inout') || ease.includes('outin'))) {
         messages.push("・直線、加速、減速以外の曲線が使われています");
     }
@@ -49,15 +28,13 @@ function analyzeUSC(content) {
     }
 
     // 逆走チェック: すべての timeScale を評価
-    for (let i = 0; i < timescales.length; i++) {
-        const timeScaleValue = parseFloat(timescales[i].match(/([-]?[0-9]*\.?[0-9]+)/)[0]);
-        // 負の timeScale 値が見つかった場合
-        if (timeScaleValue < 0) {
-            messages.push("・逆走が使用されています");
+    for (let timeScale of timescales) {
+        const value = parseFloat(timeScale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+        if (value < 0) {
+            messages.push("・逆走が使われています");
+            break;  // Found a negative value, no need to continue checking
         }
     }
-
-
 
     // LaneとSizeのチェック
     const allowedLanes = new Set([-6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
