@@ -23,6 +23,7 @@ function analyzeUSC(content) {
     resultsDiv.innerHTML = "";  // Clear previous results
 
     let messages = [];  // ここでメッセージを初期化
+    const data = {};
 
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
