@@ -99,3 +99,14 @@ function analyzeUSC(content) {
         resultsDiv.innerHTML = "公式レギュレーション内です<br>";
     }
 }
+
+document.getElementById('uscFile').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            analyzeUSC(e.target.result);
+        };
+        reader.readAsText(file);
+    }
+});
