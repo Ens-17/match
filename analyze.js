@@ -7,6 +7,13 @@ document.getElementById('uscFile').addEventListener('change', function() {
         return;
     }
 
+    const allowedExtensions = ['usc'];
+
+    if (!isAllowedExtension(uscFile, allowedExtensions)) {
+        resultDiv.innerHTML = 'uscファイルにのみ対応しています';
+        return;
+    }
+
     const file = fileInput.files[0];
     const reader = new FileReader();
 
