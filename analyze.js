@@ -34,9 +34,10 @@ function analyzeUSC(content) {
     const eases = content.match(/"ease":\s*"(.*?)"/g) || [];
 
     // ルールチェック
-    if (!types.some(type => type.includes('timeScaleGroup'))) {
+    if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
         messages.push("・レイヤーが複数あります");
     }
+
 
     if (eases.some(ease => ease.includes('inout') || ease.includes('outin'))) {
         messages.push("・直線、加速、減速以外の曲線が使われています");
