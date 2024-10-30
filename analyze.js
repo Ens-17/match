@@ -47,9 +47,9 @@ function analyzeUSC(content) {
         messages.push("・緑、黄以外の色ガイドが使われています");
     }
 
-    if (timescales.length > 0) {
-        const timeScaleValue = parseFloat(timescales[0].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
-        if (timeScaleValue < 0) {
+    if (data.hasOwnProperty('timeScale')) {
+        const negativeTimeScale = /"timeScale":\s*-\d+(\.\d+)?/.test(content);
+        if (negativeTimeScale) {
             messages.push("・逆走が使用されています");
         }
     }
