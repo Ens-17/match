@@ -111,7 +111,7 @@ function sortText(text) {
 // スクロールして一定量下がったらボタンを表示
 window.onscroll = function() {
     const btn = document.getElementById("scrollToTopBtn");
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 301) {
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
         btn.style.display = "block";
     } else {
         btn.style.display = "none";
