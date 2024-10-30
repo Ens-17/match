@@ -28,7 +28,7 @@ function analyzeUSC(content) {
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const fades = content.match(/"fade":\s*"(.*?)"/g) || [];
-    const timescales = content.match(/"timeScale":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
+    const timescales = content.match(/"timeScale":\s*([-]?[0-9]*\.?[0-9]+)/g) || [];
     const types = content.match(/"type":\s*"(.*?)"/g) || [];
     const colors = content.match(/"color":\s*"(.*?)"/g) || [];
     const directions = content.match(/"direction":\s*"(.*?)"/g) || [];
@@ -50,11 +50,10 @@ function analyzeUSC(content) {
 
     // 逆走チェック: すべての timeScale を評価
     for (let i = 0; i < timescales.length; i++) {
-        const timeScaleValue = parseFloat(timescales[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
-        
+        const timeScaleValue = parseFloat(timescales[i].match(/([-]?[0-9]*\.?[0-9]+)/)[0]);
+        // 負の timeScale 値が見つかった場合
         if (timeScaleValue < 0) {
             messages.push("・逆走が使用されています");
-            break; // 1つの負の timeScale が見つかった時点でループを終了
         }
     }
 
