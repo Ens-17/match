@@ -48,10 +48,16 @@ function analyzeUSC(content) {
         messages.push("・緑、黄以外の色ガイドが使われています");
     }
 
-    if (data.hasOwnProperty('timeScale')) {
-        const negativeTimeScale = /"timeScale":\s*-\d+(\.\d+)?/.test(content);
-        if (negativeTimeScale) {
+    const timescales = content.match(/"timeScale":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
+
+    // 逆走チェック: すべての timeScale を評価
+    for (let i = 0; i < timescales.length; i++) {
+        const timeScaleValue = parseFloat(timescales[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+        
+        if (timeScaleValue < 0) {
             messages.push("・逆走が使用されています");
+            // ループを抜ける場合は、以下の行をコメントアウトまたは削除してください。
+            // break; // これにより、1つの負の timeScale のみでメッセージが追加される。
         }
     }
 
