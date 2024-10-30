@@ -48,8 +48,6 @@ function analyzeUSC(content) {
         messages.push("・緑、黄以外の色ガイドが使われています");
     }
 
-    const timescales = content.match(/"timeScale":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
-
     // 逆走チェック: すべての timeScale を評価
     for (let i = 0; i < timescales.length; i++) {
         const timeScaleValue = parseFloat(timescales[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
