@@ -48,7 +48,7 @@ function analyzeUSC(content) {
     }
 
     if (timescales.length > 0) {
-        const timeScaleValue = parseFloat(timescales[0].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+        const timeScaleValue = parseFloat(timescales[0].match(/([-]?[0-9]*\.?[0-9]+)/)[0]);
         if (timeScaleValue < 0) {
             messages.push("・逆走が使用されています");
         }
