@@ -136,25 +136,35 @@ function analyzeUSC(content) {
         messages.push("・矢印無しフリックが使われています");
     }
 
-    if (fades.some(fade => fade.includes('in'))) {
-        messages.push("・フェードインガイドが使われています");
-    }
-
-    // 結果の出力
     if (messages.length > 0) {
-        resultsDiv.innerHTML = messages.join("<br>") + "<br>";
+        resultsDiv.innerHTML = messages.join("<br>");
     } else {
-        resultsDiv.innerHTML = "公式レギュレーション内です<br>";
+        resultsDiv.innerHTML = "公式レギュレーション内です";
     }
 }
 
 document.getElementById('uscFile').addEventListener('change', function (event) {
     const file = event.target.files[0];
-    if (file) {
+    const resultsDiv = document.getElementById('result');
+
+    if (!file) {
+        resultsDiv.innerHTML = "ファイルを選択してください";
+        return;
+    }
+
+    if (file.name.endsWith('.usc')) {
+        // USCファイルが選択された場合、ファイルを読み込み解析する
         const reader = new FileReader();
         reader.onload = function (e) {
-            analyzeUSC(e.target.result);
+            const content = e.target.result;
+            analyzeUSC(content);
         };
         reader.readAsText(file);
+    } else if (file.name.endsWith('.sus')) {
+        // SUSファイルが選択された場合、別のメッセージを表示
+        resultsDiv.innerHTML = "SUSファイルが選択されましたが、現在解析機能は対応していません。";
+    } else {
+        // その他のファイル形式の場合、無効なファイル形式のメッセージを表示
+        resultsDiv.innerHTML = "無効なファイル形式です。USCまたはSUSファイルを選択してください。";
     }
 });
