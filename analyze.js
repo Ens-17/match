@@ -1,20 +1,6 @@
-document.getElementById('uscFile').addEventListener('change', function (event) {
-    const file = event.target.files[0];
-    if (file) {
-        const fileName = file.name.toLowerCase();
-        const resultsDiv = document.getElementById('result');
-        
-        if (fileName.endsWith('.usc')) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                analyzeUSC(e.target.result);
-            };
-            reader.readAsText(file);
-        } else if (fileName.endsWith('.sus')) {
-            resultsDiv.innerHTML = "sus<br>";
-        } else {
-            resultsDiv.innerHTML = "既定のファイルを選択してください<br>";
-        }
+function analyzeUSC(content) {
+    const resultsDiv = document.getElementById('result');
+    resultsDiv.innerHTML = "";
 
     let messages = [];
     const data = {};
