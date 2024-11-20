@@ -3,7 +3,7 @@ function analyzeUSC(content) {
     resultsDiv.innerHTML = "";
 
     let messages = [];
-    const lines = content.split("\n"); // 行単位で分割
+    const lines = content.split("\n");
 
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
@@ -14,7 +14,6 @@ function analyzeUSC(content) {
     const directions = content.match(/"direction":\s*"(.*?)"/g) || [];
     const eases = content.match(/"ease":\s*"(.*?)"/g) || [];
 
-    // 各要素の行番号を記録する関数
     function getLineNumbers(matches, content) {
         const lineNumbers = [];
         matches.forEach(match => {
@@ -25,7 +24,6 @@ function analyzeUSC(content) {
         return lineNumbers;
     }
 
-    // 各要素の行番号リストを取得
     const laneLines = getLineNumbers(lanes, content);
     const sizeLines = getLineNumbers(sizes, content);
     const fadeLines = getLineNumbers(fades, content);
