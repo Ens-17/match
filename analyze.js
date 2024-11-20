@@ -3,7 +3,7 @@ function analyzeUSC(content) {
     resultsDiv.innerHTML = "";
 
     let messages = [];
-    const data = {};
+    const lines = content.split("\n"); // 行単位で分割
 
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
@@ -14,25 +14,50 @@ function analyzeUSC(content) {
     const directions = content.match(/"direction":\s*"(.*?)"/g) || [];
     const eases = content.match(/"ease":\s*"(.*?)"/g) || [];
 
+    // 各要素の行番号を記録する関数
+    function getLineNumbers(matches, content) {
+        const lineNumbers = [];
+        matches.forEach(match => {
+            const index = content.indexOf(match);
+            const lineNumber = content.substring(0, index).split("\n").length;
+            lineNumbers.push(lineNumber);
+        });
+        return lineNumbers;
+    }
+
+    // 各要素の行番号リストを取得
+    const laneLines = getLineNumbers(lanes, content);
+    const sizeLines = getLineNumbers(sizes, content);
+    const fadeLines = getLineNumbers(fades, content);
+    const timescaleLines = getLineNumbers(timescales, content);
+    const typeLines = getLineNumbers(types, content);
+    const colorLines = getLineNumbers(colors, content);
+    const directionLines = getLineNumbers(directions, content);
+    const easeLines = getLineNumbers(eases, content);
+
     if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
         messages.push("・レイヤーが複数あります");
     }
 
-    if (eases.some(ease => ease.includes('inout') || ease.includes('outin'))) {
-        messages.push("・直線、加速、減速以外の曲線が使われています");
-    }
-
-    if (colors.some(color => ['neutral', 'red', 'blue', 'purple', 'black', 'cyan'].includes(color.split('"')[3]))) {
-        messages.push("・緑、黄以外の色ガイドが使われています");
-    }
-
-    for (let timeScale of timescales) {
-        const value = parseFloat(timeScale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
-        if (value < 0) {
-            messages.push("・逆走が使われています");
-            break;
+    eases.forEach((ease, index) => {
+        if (ease.includes('inout') || ease.includes('outin')) {
+            messages.push(`・直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
         }
-    }
+    });
+
+    colors.forEach((color, index) => {
+        const colorValue = color.split('"')[3];
+        if (!['green', 'yellow'].includes(colorValue)) {
+            messages.push(`・緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
+        }
+    });
+
+    timescales.forEach((timescale, index) => {
+        const value = parseFloat(timescale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
+        if (value < 0) {
+            messages.push(`・逆走が使われています [${timescaleLines[index]}]`);
+        }
+    });
 
     const allowedLanes = new Set([-5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]);
     const allowedSizes = new Set([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
@@ -44,127 +69,50 @@ function analyzeUSC(content) {
         const laneValue = parseFloat(lanes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
 
-        // Laneが-nまたはnの場合、Sizeはx~yである必要がある
-        if ((laneValue === -5.5 || laneValue === 5.5) && sizeValue !== 0.5 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 5.0 || laneValue === -5.0) && sizeValue !== 1.0 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 4.5 || laneValue === -4.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 4.0 || laneValue === -4.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 3.5 || laneValue === -3.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 3.0 || laneValue === -3.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 2.5 || laneValue === -2.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 2.0 || laneValue === -2.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && sizeValue !== 4.0 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 1.5 || laneValue === -1.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && sizeValue !== 4.5 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 1.0 || laneValue === -1.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && sizeValue !== 4.0 && sizeValue !== 5.0 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 0.5 || laneValue === -0.5) && sizeValue !== 0.5 && sizeValue !== 1.5 && sizeValue !== 2.5 && sizeValue !== 3.5 && sizeValue !== 4.5 && sizeValue !== 5.5 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
-        if ((laneValue === 0.0 || laneValue === -0.0) && sizeValue !== 1.0 && sizeValue !== 2.0 && sizeValue !== 3.0 && sizeValue !== 4.0 && sizeValue !== 5.0 && sizeValue !== 6.0 && !laneViolationMessage) {
-            messages.push("・レーン外にノーツが使われています");
-            laneViolationMessage = true;
-        }
-
         if (!allowedLanes.has(laneValue) && !laneViolationMessage) {
-            messages.push("・レーン外、または小数レーンにノーツが使われています");
+            messages.push(`・レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
             laneViolationMessage = true;
         }
 
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
-            messages.push("・1~12の整数幅ではないノーツが使われています");
+            messages.push(`・1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
             sizeViolationMessage = true;
-            console.log("Invalid size detected:", sizeValue);
-        }
-
-        // Sizeが2倍になった結果の条件チェック
-        if (sizeValue !== null) {
-            const sizeDoubled = sizeValue * 2;
-            if ((sizeDoubled % 2 === 0 && laneValue % 1 !== 0) || (sizeDoubled % 2 !== 0 && laneValue % 1 === 0)) {
-                if (!laneViolationMessage) {
-                    messages.push("・レーン外、または小数レーンにノーツが使われています");
-                    laneViolationMessage = true;
-                }
-            }
         }
     }
 
-    if (types.some(type => type.includes('damage'))) {
-        messages.push("・ダメージノーツが使われています");
-    }
+    types.forEach((type, index) => {
+        if (type.includes('damage')) {
+            messages.push(`・ダメージノーツが使われています [${typeLines[index]}]`);
+        }
+    });
 
-    if (directions.some(direction => direction.includes('none'))) {
-        messages.push("・矢印無しフリックが使われています");
-    }
+    directions.forEach((direction, index) => {
+        if (direction.includes('none')) {
+            messages.push(`・矢印無しフリックが使われています [${directionLines[index]}]`);
+        }
+    });
 
+    fades.forEach((fade, index) => {
+        if (fade.includes('in')) {
+            messages.push(`・フェードインガイドが使われています [${fadeLines[index]}]`);
+        }
+    });
+
+    // 結果の出力
     if (messages.length > 0) {
-        resultsDiv.innerHTML = messages.join("<br>");
+        resultsDiv.innerHTML = messages.join("<br>") + "<br>";
     } else {
-        resultsDiv.innerHTML = "公式レギュレーション内です";
+        resultsDiv.innerHTML = "公式レギュレーション内です<br>";
     }
 }
 
 document.getElementById('uscFile').addEventListener('change', function (event) {
     const file = event.target.files[0];
-    const resultsDiv = document.getElementById('result');
-
-    if (!file) {
-        resultsDiv.innerHTML = "ファイルを選択してください";
-        return;
-    }
-
-    if (file.name.endsWith('.usc')) {
-        // USCファイルが選択された場合、ファイルを読み込み解析する
+    if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            const content = e.target.result;
-            analyzeUSC(content);
+            analyzeUSC(e.target.result);
         };
         reader.readAsText(file);
-    } else if (file.name.endsWith('.sus')) {
-        // SUSファイルが選択された場合、別のメッセージを表示
-        resultsDiv.innerHTML = "現在susには対応していません。";
-    } else {
-        // その他のファイル形式の場合、無効なファイル形式のメッセージを表示
-        resultsDiv.innerHTML = "譜面ファイルを選択してください。";
     }
 });
