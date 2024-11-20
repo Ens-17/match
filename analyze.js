@@ -106,11 +106,27 @@ function analyzeUSC(content) {
 
 document.getElementById('uscFile').addEventListener('change', function (event) {
     const file = event.target.files[0];
-    if (file) {
+    const resultsDiv = document.getElementById('result');
+
+    if (!file) {
+        resultsDiv.innerHTML = "ファイルを選択してください";
+        return;
+    }
+
+    if (file.name.endsWith('.usc')) {
+        // USCファイルが選択された場合、ファイルを読み込み解析する
         const reader = new FileReader();
         reader.onload = function (e) {
-            analyzeUSC(e.target.result);
+            const content = e.target.result;
+            analyzeUSC(content);
         };
         reader.readAsText(file);
+    } else if (file.name.endsWith('.sus')) {
+        // SUSファイルが選択された場合、別のメッセージを表示
+        resultsDiv.innerHTML = "現在susには対応していません。";
+    } else {
+        // その他のファイル形式の場合、無効なファイル形式のメッセージを表示
+        resultsDiv.innerHTML = "譜面ファイルを選択してください。";
     }
 });
+
