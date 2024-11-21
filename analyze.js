@@ -4,7 +4,7 @@ function analyzeUSC(content) {
 
     let messages = [];
     const lines = content.split("\n");
-
+    
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const fades = content.match(/"fade":\s*"(.*?)"/g) || [];
@@ -32,67 +32,82 @@ function analyzeUSC(content) {
     const colorLines = getLineNumbers(colors, content);
     const directionLines = getLineNumbers(directions, content);
     const easeLines = getLineNumbers(eases, content);
+    
+    const flags = {
+        laneViolation: false,
+        sizeViolation: false,
+        typeViolation: false,
+        directionViolation: false,
+        fadeViolation: false,
+        easeViolation: false,
+        colorViolation: false,
+        timescaleViolation: false,
+    };
 
+    // 複数レイヤーチェック
     if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
         messages.push("・レイヤーが複数あります");
     }
 
     eases.forEach((ease, index) => {
-        if (ease.includes('inout') || ease.includes('outin')) {
+        if ((ease.includes('inout') || ease.includes('outin')) && !flags.easeViolation) {
             messages.push(`・直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
+            flags.easeViolation = true;
         }
     });
 
     colors.forEach((color, index) => {
         const colorValue = color.split('"')[3];
-        if (!['green', 'yellow'].includes(colorValue)) {
+        if (!['green', 'yellow'].includes(colorValue) && !flags.colorViolation) {
             messages.push(`・緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
+            flags.colorViolation = true;
         }
     });
 
     timescales.forEach((timescale, index) => {
         const value = parseFloat(timescale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
-        if (value < 0) {
+        if (value < 0 && !flags.timescaleViolation) {
             messages.push(`・逆走が使われています [${timescaleLines[index]}]`);
+            flags.timescaleViolation = true;
         }
     });
 
     const allowedLanes = new Set([-5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]);
     const allowedSizes = new Set([0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]);
 
-    let laneViolationMessage = false;
-    let sizeViolationMessage = false;
-
     for (let i = 0; i < lanes.length; i++) {
         const laneValue = parseFloat(lanes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
 
-        if (!allowedLanes.has(laneValue) && !laneViolationMessage) {
+        if (!allowedLanes.has(laneValue) && !flags.laneViolation) {
             messages.push(`・レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
-            laneViolationMessage = true;
+            flags.laneViolation = true;
         }
 
-        if (sizeValue !== null && !allowedSizes.has(sizeValue) && !sizeViolationMessage) {
+        if (sizeValue !== null && !allowedSizes.has(sizeValue) && !flags.sizeViolation) {
             messages.push(`・1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
-            sizeViolationMessage = true;
+            flags.sizeViolation = true;
         }
     }
 
     types.forEach((type, index) => {
-        if (type.includes('damage')) {
+        if (type.includes('damage') && !flags.typeViolation) {
             messages.push(`・ダメージノーツが使われています [${typeLines[index]}]`);
+            flags.typeViolation = true;
         }
     });
 
     directions.forEach((direction, index) => {
-        if (direction.includes('none')) {
+        if (direction.includes('none') && !flags.directionViolation) {
             messages.push(`・矢印無しフリックが使われています [${directionLines[index]}]`);
+            flags.directionViolation = true;
         }
     });
 
     fades.forEach((fade, index) => {
-        if (fade.includes('in')) {
+        if (fade.includes('in') && !flags.fadeViolation) {
             messages.push(`・フェードインガイドが使われています [${fadeLines[index]}]`);
+            flags.fadeViolation = true;
         }
     });
 
@@ -129,4 +144,3 @@ document.getElementById('uscFile').addEventListener('change', function (event) {
         resultsDiv.innerHTML = "譜面ファイルを選択してください。";
     }
 });
-
