@@ -59,7 +59,7 @@ function analyzeUSC(content) {
     colors.forEach((color, index) => {
         const colorValue = color.split('"')[3];
         if (!['green', 'yellow'].includes(colorValue) && !flags.colorViolation) {
-            messages.push(`・緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
+            messages.push(`️⭕️ 緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
             flags.colorViolation = true;
         }
     });
