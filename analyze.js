@@ -117,6 +117,7 @@ function analyzeUSC(content) {
     } else {
         resultsDiv.innerHTML = "✔️ 公式レギュレーション内です<br>";
     }
+        resultsDiv.style.display = "block";
 }
 
 document.getElementById('uscFile').addEventListener('change', function (event) {
