@@ -46,12 +46,12 @@ function analyzeUSC(content) {
 
     // 複数レイヤーチェック
     if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
-        messages.push("・レイヤーが複数あります");
+        messages.push("❌ レイヤーが複数あります");
     }
 
     eases.forEach((ease, index) => {
         if ((ease.includes('inout') || ease.includes('outin')) && !flags.easeViolation) {
-            messages.push(`・直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
+            messages.push(`❌ 直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
             flags.easeViolation = true;
         }
     });
@@ -59,7 +59,7 @@ function analyzeUSC(content) {
     colors.forEach((color, index) => {
         const colorValue = color.split('"')[3];
         if (!['green', 'yellow'].includes(colorValue) && !flags.colorViolation) {
-            messages.push(`️・緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
+            messages.push(`️️⭕️ 緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
             flags.colorViolation = true;
         }
     });
@@ -67,7 +67,7 @@ function analyzeUSC(content) {
     timescales.forEach((timescale, index) => {
         const value = parseFloat(timescale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         if (value < 0 && !flags.timescaleViolation) {
-            messages.push(`・逆走が使われています [${timescaleLines[index]}]`);
+            messages.push(`❌ 逆走が使われています [${timescaleLines[index]}]`);
             flags.timescaleViolation = true;
         }
     });
@@ -80,33 +80,33 @@ function analyzeUSC(content) {
         const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
 
         if (!allowedLanes.has(laneValue) && !flags.laneViolation) {
-            messages.push(`・レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
+            messages.push(`❌ レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
             flags.laneViolation = true;
         }
 
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !flags.sizeViolation) {
-            messages.push(`・1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
+            messages.push(`❌ 1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
             flags.sizeViolation = true;
         }
     }
 
     types.forEach((type, index) => {
         if (type.includes('damage') && !flags.typeViolation) {
-            messages.push(`・ダメージノーツが使われています [${typeLines[index]}]`);
+            messages.push(`❌ ダメージノーツが使われています [${typeLines[index]}]`);
             flags.typeViolation = true;
         }
     });
 
     directions.forEach((direction, index) => {
         if (direction.includes('none') && !flags.directionViolation) {
-            messages.push(`・矢印無しフリックが使われています [${directionLines[index]}]`);
+            messages.push(`❌ 矢印無しフリックが使われています [${directionLines[index]}]`);
             flags.directionViolation = true;
         }
     });
 
     fades.forEach((fade, index) => {
         if (fade.includes('in') && !flags.fadeViolation) {
-            messages.push(`・フェードインガイドが使われています [${fadeLines[index]}]`);
+            messages.push(`️⭕️ フェードインガイドが使われています [${fadeLines[index]}]`);
             flags.fadeViolation = true;
         }
     });
@@ -115,7 +115,7 @@ function analyzeUSC(content) {
     if (messages.length > 0) {
         resultsDiv.innerHTML = messages.join("<br>") + "<br>";
     } else {
-        resultsDiv.innerHTML = "公式レギュレーション内です<br>";
+        resultsDiv.innerHTML = "✔️ 公式レギュレーション内です<br>";
     }
 }
 
