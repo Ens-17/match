@@ -6,6 +6,14 @@ body {
     padding: 0;
 }
 
+#result {
+    display: none;
+}
+
+#result2 {
+    display: none;
+}
+
 .container {
     max-width: 800px;
     margin: 50px auto;
