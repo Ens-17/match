@@ -1,6 +1,9 @@
 function analyzeUSC(content) {
     const resultsDiv = document.getElementById('result');
+    const resultsDiv2 = document.getElementById('result2');  // result2を追加
+
     resultsDiv.innerHTML = "";
+    resultsDiv2.innerHTML = "";
 
     let messages = [];
     const lines = content.split("\n");
@@ -44,22 +47,25 @@ function analyzeUSC(content) {
         timescaleViolation: false,
     };
 
-    // 複数レイヤーチェック
-    if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
-        messages.push("❌ レイヤーが複数あります");
-    }
+    const redMessages = [];   // ❌ メッセージ
+    const greenMessages = []; // ⭕ メッセージ
 
     eases.forEach((ease, index) => {
         if ((ease.includes('inout') || ease.includes('outin')) && !flags.easeViolation) {
-            messages.push(`❌ 直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
+            redMessages.push(`❌ 直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
             flags.easeViolation = true;
         }
     });
 
+    // 複数レイヤーチェック
+    if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
+        redMessages.push("❌ レイヤーが複数あります");
+    }
+
     colors.forEach((color, index) => {
         const colorValue = color.split('"')[3];
         if (!['green', 'yellow'].includes(colorValue) && !flags.colorViolation) {
-            messages.push(`️️⭕️ 緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
+            greenMessages.push(`⭕️ 緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
             flags.colorViolation = true;
         }
     });
@@ -67,7 +73,7 @@ function analyzeUSC(content) {
     timescales.forEach((timescale, index) => {
         const value = parseFloat(timescale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         if (value < 0 && !flags.timescaleViolation) {
-            messages.push(`❌ 逆走が使われています [${timescaleLines[index]}]`);
+            redMessages.push(`❌ 逆走が使われています [${timescaleLines[index]}]`);
             flags.timescaleViolation = true;
         }
     });
@@ -80,44 +86,56 @@ function analyzeUSC(content) {
         const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
 
         if (!allowedLanes.has(laneValue) && !flags.laneViolation) {
-            messages.push(`❌ レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
+            redMessages.push(`❌ レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
             flags.laneViolation = true;
         }
 
         if (sizeValue !== null && !allowedSizes.has(sizeValue) && !flags.sizeViolation) {
-            messages.push(`❌ 1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
+            redMessages.push(`❌ 1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
             flags.sizeViolation = true;
         }
     }
 
     types.forEach((type, index) => {
         if (type.includes('damage') && !flags.typeViolation) {
-            messages.push(`❌ ダメージノーツが使われています [${typeLines[index]}]`);
+            greenMessages.push(`️⭕️ ダメージノーツが使われています [${typeLines[index]}]`);
             flags.typeViolation = true;
         }
     });
 
     directions.forEach((direction, index) => {
         if (direction.includes('none') && !flags.directionViolation) {
-            messages.push(`❌ 矢印無しフリックが使われています [${directionLines[index]}]`);
+            redMessages.push(`️❌ 矢印無しフリックが使われています [${directionLines[index]}]`);
             flags.directionViolation = true;
         }
     });
 
     fades.forEach((fade, index) => {
         if (fade.includes('in') && !flags.fadeViolation) {
-            messages.push(`️⭕️ フェードインガイドが使われています [${fadeLines[index]}]`);
+            greenMessages.push(`⭕️ フェードインガイドが使われています [${fadeLines[index]}]`);
             flags.fadeViolation = true;
         }
     });
 
     // 結果の出力
-    if (messages.length > 0) {
-        resultsDiv.innerHTML = messages.join("<br>") + "<br>";
+    if (redMessages.length > 0 && greenMessages.length > 0) {
+        resultsDiv.innerHTML = greenMessages.join("<br>") + "<br>";
+        resultsDiv2.innerHTML = redMessages.join("<br>") + "<br>";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "block";
+    } else if (redMessages.length > 0) {
+        resultsDiv2.innerHTML = redMessages.join("<br>") + "<br>";
+        resultsDiv2.style.display = "block";
+        resultsDiv.style.display = "none";
+    } else if (greenMessages.length > 0) {
+        resultsDiv.innerHTML = greenMessages.join("<br>") + "<br>";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "none";
     } else {
         resultsDiv.innerHTML = "✔️ 公式レギュレーション内です<br>";
-    }
         resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "none";
+    }
 }
 
 document.getElementById('uscFile').addEventListener('change', function (event) {
