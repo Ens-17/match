@@ -98,7 +98,7 @@ function analyzeUSC(content) {
 
     types.forEach((type, index) => {
         if (type.includes('damage') && !flags.typeViolation) {
-            greenMessages.push(`️⭕️ ダメージノーツが使われています [${typeLines[index]}]`);
+            redMessages.push(`️❌ ダメージノーツが使われています [${typeLines[index]}]`);
             flags.typeViolation = true;
         }
     });
