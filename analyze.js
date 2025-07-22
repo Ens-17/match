@@ -1,10 +1,13 @@
 function analyzeUSC(content) {
     const resultsDiv = document.getElementById('result');
+    const resultsDiv2 = document.getElementById('result2');
+
     resultsDiv.innerHTML = "";
+    resultsDiv2.innerHTML = "";
 
     let messages = [];
     const lines = content.split("\n");
-    
+
     const lanes = content.match(/"lane":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const sizes = content.match(/"size":\s*([-+]?[0-9]*\.?[0-9]+)/g) || [];
     const fades = content.match(/"fade":\s*"(.*?)"/g) || [];
@@ -14,52 +17,66 @@ function analyzeUSC(content) {
     const directions = content.match(/"direction":\s*"(.*?)"/g) || [];
     const eases = content.match(/"ease":\s*"(.*?)"/g) || [];
 
-    function getLineNumbers(matches, content) {
-        const lineNumbers = [];
+    function getBeatValues(matches, content) {
+        const beats = [];
         matches.forEach(match => {
             const index = content.indexOf(match);
-            const lineNumber = content.substring(0, index).split("\n").length;
-            lineNumbers.push(lineNumber);
+            const before = content.substring(0, index);
+            const beatMatch = before.match(/"beat":\s*([-+]?[0-9]*\.?[0-9]+)/g);
+            if (beatMatch && beatMatch.length > 0) {
+                const last = beatMatch[beatMatch.length - 1];
+                const value = last.match(/([-+]?[0-9]*\.?[0-9]+)/)[0];
+                beats.push(value);
+            } else {
+                beats.push("不明");
+            }
         });
-        return lineNumbers;
+        return beats;
     }
 
-    const laneLines = getLineNumbers(lanes, content);
-    const sizeLines = getLineNumbers(sizes, content);
-    const fadeLines = getLineNumbers(fades, content);
-    const timescaleLines = getLineNumbers(timescales, content);
-    const typeLines = getLineNumbers(types, content);
-    const colorLines = getLineNumbers(colors, content);
-    const directionLines = getLineNumbers(directions, content);
-    const easeLines = getLineNumbers(eases, content);
-    
+    const laneBeats = getBeatValues(lanes, content);
+    const sizeBeats = getBeatValues(sizes, content);
+    const fadeBeats = getBeatValues(fades, content);
+    const timescaleBeats = getBeatValues(timescales, content);
+    const typeBeats = getBeatValues(types, content);
+    const colorBeats = getBeatValues(colors, content);
+    const directionBeats = getBeatValues(directions, content);
+    const easeBeats = getBeatValues(eases, content);
+
     const flags = {
         laneViolation: false,
         sizeViolation: false,
+        laneViolation2: false,
+        sizeViolation2: false,
+        sizeViolation3: false,
         typeViolation: false,
         directionViolation: false,
         fadeViolation: false,
         easeViolation: false,
         colorViolation: false,
         timescaleViolation: false,
+        sizeLaneMismatch: false,
+        sizeLaneMismatch2: false,
     };
 
-    // 複数レイヤーチェック
-    if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
-        messages.push("・ レイヤーが複数あります");
-    }
+    const redMessages = [];
+    const greenMessages = [];
 
     eases.forEach((ease, index) => {
         if ((ease.includes('inout') || ease.includes('outin')) && !flags.easeViolation) {
-            messages.push(`・ 直線、加速、減速以外の曲線が使われています [${easeLines[index]}]`);
+            redMessages.push(`️直線、加速、減速以外の曲線が使われています [${easeBeats[index]}]`);
             flags.easeViolation = true;
         }
     });
 
+    if (types.filter(type => type.includes('timeScaleGroup')).length >= 2) {
+        redMessages.push("️レイヤーが複数あります");
+    }
+
     colors.forEach((color, index) => {
         const colorValue = color.split('"')[3];
         if (!['green', 'yellow'].includes(colorValue) && !flags.colorViolation) {
-            messages.push(`️️・ 緑、黄以外の色ガイドが使われています [${colorLines[index]}]`);
+            redMessages.push(`緑、黄以外の色ガイドが使われています [${colorBeats[index]}]`);
             flags.colorViolation = true;
         }
     });
@@ -67,7 +84,7 @@ function analyzeUSC(content) {
     timescales.forEach((timescale, index) => {
         const value = parseFloat(timescale.match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         if (value < 0 && !flags.timescaleViolation) {
-            messages.push(`・ 逆走が使われています [${timescaleLines[index]}]`);
+            redMessages.push(`逆走が使われています [${timescaleBeats[index]}]`);
             flags.timescaleViolation = true;
         }
     });
@@ -79,51 +96,92 @@ function analyzeUSC(content) {
         const laneValue = parseFloat(lanes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]);
         const sizeValue = i < sizes.length ? parseFloat(sizes[i].match(/([-+]?[0-9]*\.?[0-9]+)/)[0]) : null;
 
-        if (!allowedLanes.has(laneValue) && !flags.laneViolation) {
-            messages.push(`・ レーン外、または小数レーンにノーツが使われています [${laneLines[i]}]`);
+        if (laneValue % 1 !== 0 && !allowedLanes.has(laneValue) && !flags.laneViolation) {
+            redMessages.push(`️小数レーンにノーツが置かれています [${laneBeats[i]}]`);
             flags.laneViolation = true;
         }
 
-        if (sizeValue !== null && !allowedSizes.has(sizeValue) && !flags.sizeViolation) {
-            messages.push(`・ 1~12の整数幅ではないノーツが使われています [${sizeLines[i]}]`);
-            flags.sizeViolation = true;
+        const leftEdge = laneValue - sizeValue;
+        const rightEdge = laneValue + sizeValue;
+
+        if ((leftEdge < -6.0 || rightEdge > 6.0) && !flags.laneViolation2) {
+            redMessages.push(`ノーツがレーン外に飛び出しています [${laneBeats[i]}]`);
+            flags.laneViolation2 = true;
+        }
+
+        if (sizeValue !== null) {
+            if (sizeValue * 2 > 0 && sizeValue * 2 < 13 && !allowedSizes.has(sizeValue) && !flags.sizeViolation) {
+                redMessages.push(`小数幅のノーツが使われています [${sizeBeats[i]}]`);
+                flags.sizeViolation = true;
+            }
+
+            if (sizeValue * 2 >= 13 && !flags.sizeViolation2) {
+                redMessages.push(`13幅以上のノーツが置かれています [${sizeBeats[i]}]`);
+                flags.sizeViolation2 = true;
+            }
+
+            if (sizeValue * 2 === 0 && !flags.sizeViolation3) {
+                redMessages.push(`️0幅のノーツが置かれています [${sizeBeats[i]}]`);
+                flags.sizeViolation3 = true;
+            }
+
+            if (laneValue % 1 === 0 && sizeValue !== null && sizeValue * 2 % 2 !== 0 && !flags.sizeLaneMismatch) {
+                redMessages.push(`️ノーツが公式ではありえないレーンに置かれています [${laneBeats[i]}]`);
+                flags.sizeLaneMismatch = true;
+            }
+
+            if (laneValue % 1 === 0.5 && sizeValue !== null && sizeValue * 2 % 2 !== 1 && !flags.sizeLaneMismatch) {
+                redMessages.push(`️ノーツが公式ではありえないレーンに置かれています [${laneBeats[i]}]`);
+                flags.sizeLaneMismatch = true;
+            }
         }
     }
 
     types.forEach((type, index) => {
         if (type.includes('damage') && !flags.typeViolation) {
-            messages.push(`・ ダメージノーツが使われています [${typeLines[index]}]`);
+            redMessages.push(`️ダメージノーツが使われています [${typeBeats[index]}]`);
             flags.typeViolation = true;
         }
     });
 
     directions.forEach((direction, index) => {
         if (direction.includes('none') && !flags.directionViolation) {
-            messages.push(`・ 矢印無しフリックが使われています [${directionLines[index]}]`);
+            redMessages.push(`️矢印無しフリックが使われています [${directionBeats[index]}]`);
             flags.directionViolation = true;
         }
     });
 
     fades.forEach((fade, index) => {
         if (fade.includes('in') && !flags.fadeViolation) {
-            messages.push(`️・ フェードインガイドが使われています [${fadeLines[index]}]`);
+            redMessages.push(`フェードインガイドが使われています [${fadeBeats[index]}]`);
             flags.fadeViolation = true;
         }
     });
 
-    // 結果の出力
-    if (messages.length > 0) {
-        resultsDiv.innerHTML = messages.join("<br>") + "<br>";
+    if (redMessages.length > 0 && greenMessages.length > 0) {
+        resultsDiv.innerHTML = greenMessages.join("<br>") + "<br>";
+        resultsDiv2.innerHTML = redMessages.join("<br>") + "<br>";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "block";
+    } else if (redMessages.length > 0) {
+        resultsDiv2.innerHTML = redMessages.join("<br>") + "<br>";
+        resultsDiv2.style.display = "block";
+        resultsDiv.style.display = "none";
+    } else if (greenMessages.length > 0) {
+        resultsDiv.innerHTML = greenMessages.join("<br>") + "<br>";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "none";
     } else {
         resultsDiv.innerHTML = "✔️ 公式レギュレーション内です<br>";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "none";
     }
-    
-    resultsDiv.style.display = "block";
 }
 
 document.getElementById('uscFile').addEventListener('change', function (event) {
     const file = event.target.files[0];
     const resultsDiv = document.getElementById('result');
+    const resultsDiv2 = document.getElementById('result2');
 
     if (!file) {
         resultsDiv.innerHTML = "ファイルを選択してください";
@@ -131,7 +189,6 @@ document.getElementById('uscFile').addEventListener('change', function (event) {
     }
 
     if (file.name.endsWith('.usc')) {
-        // USCファイルが選択された場合、ファイルを読み込み解析する
         const reader = new FileReader();
         reader.onload = function (e) {
             const content = e.target.result;
@@ -139,10 +196,12 @@ document.getElementById('uscFile').addEventListener('change', function (event) {
         };
         reader.readAsText(file);
     } else if (file.name.endsWith('.sus')) {
-        // SUSファイルが選択された場合、別のメッセージを表示
         resultsDiv.innerHTML = "現在susには対応していません。";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "none";
     } else {
-        // その他のファイル形式の場合、無効なファイル形式のメッセージを表示
         resultsDiv.innerHTML = "譜面ファイルを選択してください。";
+        resultsDiv.style.display = "block";
+        resultsDiv2.style.display = "none";
     }
 });
