@@ -10,6 +10,10 @@ body {
     display: none;
 }
 
+#result2 {
+    display: none;
+}
+
 .container {
     max-width: 800px;
     margin: 50px auto;
@@ -17,6 +21,12 @@ body {
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+}
+
+a.bonk {
+    text-align: center;
+    color: blue;
+    text-decoration: none;
 }
 
 .bonk {
@@ -96,15 +106,15 @@ pre {
 pre span.match, pre span.mismatch {
     display: inline-block;
     width: 100%;
-    padding: 5px 0; /* 縦のパディングを追加 */
+    padding: 5px 0;
 }
 
 pre span.match {
-    background-color: #e0f7e0; /* 行全体を緑に */
+    background-color: #e0f7e0; 
 }
 
 pre span.mismatch {
-    background-color: #ffebee; /* 行全体を赤に */
+    background-color: #ffebee;
 }
 
 pre span.line-number {
@@ -139,12 +149,11 @@ a:hover {
     text-decoration: underline;
 }
 
-/* スクロールボタンのスタイル */
 #scrollToTopBtn {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    display: none; /* 初期状態では非表示 */
+    display: none;
     background-color: #555;
     color: white;
     border: none;
